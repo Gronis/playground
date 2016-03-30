@@ -1,23 +1,14 @@
 #include <iostream>
-#include <vector>
-
+#include <string>
+#include <sstream>
 
 int main(int argc, char ** args){
-  if(argc < 2){
-    std::cout << "Must provide an number" << std::endl;
-  }
-  int n = std::stoi(args[1]);
+  std::string token, s = "hej,jag,gillar,kakor";
+  std::stringstream ss(s);
 
-  std::vector<int> ar;
-  ar.resize(n);
-
-  //iterative since mem complexity O(n)
-  for (int i = 1; i <= n; ++i){
-    ar[i] = (i & 1) == 1;
-    if(i >> 1 > 0) ar[i] += ar[i >> 1];
-  }
-
-  for (int i = 0; i <= n; ++i){
-    std::cout << ar[i] << " ";
-  }
+  std::string ar[4];
+  for(int i = 0; i < 4 && getline(ss,token,','); ++i) ar[i] = token;
+  reverse(&ar[0], &ar[4]);
+  for(int i = 0; i < 4; ++i) std::cout << ar[i] << " ";
+  std::cout << std::endl;  
 }
