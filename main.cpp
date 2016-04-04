@@ -10,7 +10,7 @@ int myAtoi(std::string str) {
   int digitmultiplier =  1;
   int sign            =  1;
 
-  auto is_whitespace = [] (char c){ return c == ' ' || c == '\t'; };
+  auto is_whitespace = [] (char c){ return c == ' ' || c == '\t' || c == '+'; };
   auto is_number = [] (char c) { return c >= '0' && c <= '9'; };
 
   // Find start index at the first non whitespace character
@@ -22,8 +22,6 @@ int myAtoi(std::string str) {
   if(str[startindex] == '-') {
     ++startindex;
     sign = -1;
-  } else if(str[startindex] == '+'){
-    ++startindex;
   }
 
   // Find end index at the first non whitespace character
@@ -32,16 +30,11 @@ int myAtoi(std::string str) {
   
   // Calculate number, starting from the right most digit.
   for (int i = endindex - 1; i >= startindex; --i){
-    int digit = (str[i] - '0');
+    int digit = str[i] - '0';
     int tmp = digit * digitmultiplier;
     // check for overflow
-
-    //std::cout << number << std::endl;
-    //std::cout << i << std::endl;
-    //std::cout << digitmultiplier << std::endl;
-    //std::cout << tmp << std::endl;
     if(number > INT_MAX - tmp || tmp / digitmultiplier != digit || (digitmultiplier % 10 != 0 && number != 0)) {
-      return sign == 1? INT_MAX : INT_MIN; 
+      return sign == 1? INT_MAX : INT_MIN;
     }
     digitmultiplier *= 10;
     number += tmp;
@@ -61,6 +54,7 @@ int main(int argc, char ** args){
   test("-2147483647",    -2147483647);
   test("    10522545459", 2147483647);
   test("1",               1);
+  test(" 1",              1);
   test("-1",             -1);
   test("+1",              1);
   test("",                0);
