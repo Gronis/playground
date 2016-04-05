@@ -1,66 +1,42 @@
 #include <iostream>
-#include <string>
-#include <sstream>
-#include <exception>
+#include <unordered_set>
+#include <vector>
+#include <algorithm>
 
-int myAtoi(std::string str) {
-  int startindex      = -1;
-  int endindex        = -1;
-  int number          =  0;
-  int digitmultiplier =  1;
-  int sign            =  1;
+std::vector<std::vector<int>> threeSum(std::vector<int>& nums) {
+  std::vector<std::vector<int>> v;
+  std::sort(nums.begin(), nums.end());
 
-  auto is_whitespace = [] (char c){ return c == ' ' || c == '\t' || c == '+'; };
-  auto is_number = [] (char c) { return c >= '0' && c <= '9'; };
+  int n = nums.size();
+  int last_v1 = INT_MIN;
 
-  // Find start index at the first non whitespace character
-  for(int i = 0; i < str.length() != 0 && startindex < 0; ++i){
-    if(!is_whitespace(str[i])) startindex = i;
-  }
-
-  // In case we start with a minus sign, skip that and make negative
-  if(str[startindex] == '-') {
-    ++startindex;
-    sign = -1;
-  }
-
-  // Find end index at the first non whitespace character
-  endindex = startindex;
-  while(endindex < str.length() && is_number(str[endindex])) ++endindex;
-  
-  // Calculate number, starting from the right most digit.
-  for (int i = endindex - 1; i >= startindex; --i){
-    int digit = str[i] - '0';
-    int tmp = digit * digitmultiplier;
-    // check for overflow
-    if(number > INT_MAX - tmp || tmp / digitmultiplier != digit || (digitmultiplier % 10 != 0 && number != 0)) {
-      return sign == 1? INT_MAX : INT_MIN;
+  for (int i = 0; i < n - 2; ++i){
+    int v1 = nums[i];
+    if(v1 == last_v1) continue;
+    last_v1 = v1;
+    int startindex = i + 1;
+    int endindex = n - 1;
+    while(startindex < endindex){
+      int v2 = nums[startindex];
+      int v3 = nums[endindex];
+      int sum = v1 + v2 + v3;
+      if(sum == 0){
+        v.push_back( {v1,v2, v3});
+        std::cout << "{" << v1 << "," << v2 << "," << v3 << "}" << std::endl;
+        while(nums[endindex] == v3 && endindex > startindex) --endindex;
+      } else if(sum > 0){
+        while(nums[endindex] == v3 && endindex > startindex) --endindex;
+      } else{
+        while(nums[startindex] == v2 && endindex > startindex) ++startindex;
+      }
     }
-    digitmultiplier *= 10;
-    number += tmp;
   }
-
-  return sign * number;
+  return v;
 }
 
 int main(int argc, char ** args){
-  auto test = [](const char * p, int sol){ 
-    int my_sol = myAtoi(p);
-    if(my_sol != sol){
-      std::cout << p << ", " << my_sol << " != " << sol << std::endl;  
-    }
-  };
-
-  test("-2147483647",    -2147483647);
-  test("    10522545459", 2147483647);
-  test("1",               1);
-  test(" 1",              1);
-  test("-1",             -1);
-  test("+1",              1);
-  test("",                0);
-  test("-2147483648",    -2147483648);
-  test("2147483647",      2147483647);
-  test("2147483648",      2147483647);
-  test("010",             10);
+  std::vector<int> v = {-1, 0, 1, 2, -1, -4};
+  //std::vector<int> v = {8,-15,-2,-13,8,5,6,-3,-9,3,6,-6,8,14,-9,-8,-9,-6,-14,5,-7,3,-10,-14,-12,-11,12,-15,-1,12,8,-8,12,13,-13,-3,-5,0,10,2,-11,-7,3,4,-8,9,3,-10,11,5,10,11,-7,7,12,-12,3,1,11,9,-9,-4,9,-12,-6,11,-7,4,-4,-12,13,-8,-12,2,3,-13,-12,-8,14,14,12,9,10,12,-6,-1,8,4,8,4,-1,14,-15,-7,9,-14,11,9,5,14};
+  threeSum(v);
   return 0;
 }
