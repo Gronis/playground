@@ -12,7 +12,7 @@ auto myheapsort = [](auto begin, auto end) {
       leftindex = rightindex - 1;
       if(begin + leftindex >= end) break;
       //if there is only one child take that, otherwise take biggest
-      int childindex = (v[leftindex] > v[rightindex] || begin + rightindex == end)? leftindex : rightindex;
+      int childindex = (begin + rightindex == end || v[leftindex] > v[rightindex])? leftindex : rightindex;
       int& parent = v[parentindex];
       int& child = v[childindex];
       if(child > parent) {
@@ -25,7 +25,6 @@ auto myheapsort = [](auto begin, auto end) {
   for (int i = (n - 1) / 2; i >= 0; --i){ 
     stableize(i);
   }
-
   // Sort the heap
   while(end - begin > 0){
     std::swap(*begin, *(end-- - 1));
