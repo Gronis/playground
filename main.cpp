@@ -1,46 +1,66 @@
 #include <iostream>
-#include <unordered_set>
 #include <vector>
-#include <algorithm>
+#include <chrono>
 
 auto myheapsort = [](auto begin, auto end) {
-  int n = end - begin;
-  //Build heap
-  struct {
-    int* begin, * end;
-    void stableize(int i){  //log n time
-      int rightindex = (i + 1) * 2;
-      int leftindex = rightindex - 1;
-      if(begin + leftindex < end){
-        int* v = begin;
-        //if there is only one child take that, otherwise take biggest
-        int childindex = (v[leftindex] > v[rightindex] || begin + rightindex == end)? leftindex : rightindex;
-        int& parent = v[i];
-        int& child = v[childindex];
-        if(child > parent){
-          std::swap(child, parent);
-          // we have to recursively stabilize child in case we swapped
-          stableize(childindex);
-        }
+  // Build the heap
+  auto stableize = [&end, &begin] (int parentindex){//log n time
+    int rightindex = 0, leftindex = 0;
+    int* v = &*begin;
+    while(true){ // we have to recursively stabilize child
+      rightindex = (parentindex + 1) * 2;
+      leftindex = rightindex - 1;
+      if(begin + leftindex >= end) break;
+      //if there is only one child take that, otherwise take biggest
+      int childindex = (v[leftindex] > v[rightindex] || begin + rightindex == end)? leftindex : rightindex;
+      int& parent = v[parentindex];
+      int& child = v[childindex];
+      if(child > parent) {
+        std::swap(child, parent);
       }
+      parentindex = childindex;
     }
-  } recursive{&*begin,&*end};
+  };
+  int n = end - begin;
   for (int i = (n - 1) / 2; i >= 0; --i){ 
-    recursive.stableize(i);
+    stableize(i);
   }
 
-  //sort the heap
-  while(recursive.end - recursive.begin > 0){
-    std::swap(*recursive.begin,*(recursive.end - 1));
-    --recursive.end;
-    recursive.stableize(0);
+  // Sort the heap
+  while(end - begin > 0){
+    std::swap(*begin, *(end-- - 1));
+    stableize(0);
   }  
 };
 
+class Timer {
+ public:
+  Timer() { restart(); }
+  ~Timer() { std::cout << "Time elapsed: " << elapsed() << std::endl << std::endl; }
+
+  void restart() { _start = std::chrono::system_clock::now(); }
+  double elapsed() { return std::chrono::duration<double>(std::chrono::system_clock::now() - _start).count(); }
+ private:
+  std::chrono::time_point<std::chrono::system_clock> _start;
+};
+
 int main(int argc, char ** args){
-  std::vector<int> v = {1,10,2,9,6,4,2,34,5,6,75,3,5,6,7,7};
-  myheapsort(v.begin(), v.end());
-  for (auto && i : v) std::cout << i << " ";
-  std::cout << std::endl;
+  std::vector<int> v1,v2;
+  for (int i = 0; i < 4000000; ++i){
+    int rand = random() / 10000000;
+    v1.push_back( rand);
+    v2.push_back( rand);
+  }
+  {
+    Timer t;
+    myheapsort(v1.begin(), v1.end()); 
+  }
+  {
+    Timer t;
+    sort_heap(v2.begin(), v2.end()); 
+  }
+
+  //for (auto && i : v1) std::cout << i << " ";
+  //std::cout << std::endl;
   return 0;
 }
