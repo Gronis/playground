@@ -1,13 +1,13 @@
-#include <iostream>
-using namespace std;
+#include <stdio.h>
 
-int lengthOfLongestSubstring(string s) {
-  char* str = (char*)s.c_str();
+int lengthOfLongestSubstring(char* s) {
   int sol = 0;
-  bool used_characters[128];
-  char* start_p = str;
-  char* end_p = str;
-  for(bool* i = used_characters; i < used_characters + 128; ++i) *i = 0;
+  char used_characters[128];
+  char* start_p = s;
+  char* end_p = s;
+  for(char* i = used_characters; i < used_characters + 128; ++i){
+      *i = 0;
+  }
   while(*end_p != '\0'){
     char current_char = *end_p;
     if(used_characters[current_char]){
@@ -21,13 +21,13 @@ int lengthOfLongestSubstring(string s) {
       } 
       // move away from that character, it is still in use, so dont reset it
       ++start_p;
-    } else used_characters[current_char] = 1; 
+    } else  used_characters[current_char] = 1;
     ++end_p;
   }
-  return max(sol, (int)(end_p - start_p));
+  if(end_p - start_p > sol) sol = end_p - start_p;
+  return sol;
 } 
 
-int main(int argc, char ** args){
-  cout << lengthOfLongestSubstring("abcabcabc") << endl;
-  return 0;
+int main(){
+  printf("%d\n", lengthOfLongestSubstring("abcabcabc"));
 }
