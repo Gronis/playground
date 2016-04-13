@@ -56,7 +56,7 @@ int main(int argc, char ** args){
   }
   {
     Timer t;
-    sort_heap(v2.begin(), v2.end()); 
+    sort(v2.begin(), v2.end()); 
   }
 
   //for (auto && i : v1) std::cout << i << " ";
