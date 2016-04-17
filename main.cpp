@@ -3,5 +3,5 @@
 #include <sstream>
 
 int main(int argc, char ** args){
-  std::cout << "Hello World" << std::endl; 
+  std::cout << -3 % 10 << std::endl; 
 }
