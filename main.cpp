@@ -1,33 +1,39 @@
 #include <iostream>
-#include <string>
-#include <sstream>
+#include <unordered_map>
 
-void reverse(std::string::iterator begin, std::string::iterator end){
-  end--;
-  while(begin < end){
-    char tmp = *begin;
-    *begin = *end;
-    *end = tmp;
-    begin++; end--;
-  }
+struct Foo{
+  double price;
+  int amount;
+};
+
+namespace std{
+  template <>
+  struct hash<Foo>{
+    std::size_t operator()(const Foo & foo){
+      return hash<decltype(foo.price)>()(foo.price) << 32 ^
+             hash<decltype(foo.amount)>()(foo.amount);
+    }
+  };
 }
 
-void reverse_words(std::string& s){
-  auto start = s.begin();
-  for(auto it = s.begin(); it < s.end(); ++it){
-    if(*it == ' '){
-      reverse(start, it);
-      start = it + 1;
-    }
+std::ostream & operator <<(std::ostream & stream, const Foo & foo){
+  return stream << foo.price << " " << foo.amount;
+}
+
+template<typename K, typename V>
+std::ostream & operator <<(std::ostream & stream, const std::unordered_map<K, V> & hashMap){
+  stream << "{ ";
+  for(auto && kvPair : hashMap){
+    stream << "(" << kvPair.first << ", " << kvPair.second << ") ";
   }
-  if(start < s.end()) reverse(start, s.end());
-  reverse(s.begin(), s.end());
+  return stream << "}";
 }
 
 int main(int argc, char ** args){
-  std::string token, s = "hej jag gillar kakor";
- 
-  std::cout << s << std::endl;
-  reverse_words(s);
-  std::cout << s << std::endl;
+  std::unordered_map<std::string, Foo> shoppingList = {
+    {"potatis", Foo{10.5, 3}},
+    {"socker", Foo{5.2, 2}}
+  };
+  shoppingList.insert({"socks", Foo{0.2,10}});
+  std::cout << shoppingList << std::endl;
 }
