@@ -70,6 +70,51 @@ void print_list(list* l){
   printf("\n");
 }
 
+// split the list in two, returns the start node for the second list
+// index deontes the last index of the first list. index should not
+// exceed length of list
+list split(list l, int index){
+  // goto the last element of first list
+  while(--index >= 0) l = l->next;
+  list second = l->next;
+  l->next = NULL;
+  return second;
+}
+
+list merge(list l1, list l2){
+  list* smallest = l1->value > l2->value? &l2 : &l1;
+  list result = *smallest;
+  list result_last = result;
+  *smallest = (*smallest)->next;
+  while(l1 != NULL && l2 != NULL){
+    smallest = l1->value > l2->value? &l2 : &l1;
+    list smallest_next = (*smallest)->next;
+    result_last->next = *smallest;
+    result_last = result_last->next;
+    *smallest = smallest_next;
+  }
+  // one of the list is empty
+  if(l1 != NULL){
+    result_last->next = l1;
+  } else {
+    result_last->next = l2;
+  }
+  return result;
+}
+
+void merge_sort(list* l){
+  list it = *l;
+  list fst_l = it;
+  int length = 0;
+  while(it != NULL) { it = it->next; ++length; }
+  if(length > 1){
+    list snd_l = split(fst_l, length / 2 - 1);
+    merge_sort(&fst_l);
+    merge_sort(&snd_l);
+    *l = merge(fst_l, snd_l);
+  }
+}
+
 
 int main(){
   list* l = new_list();
@@ -89,6 +134,13 @@ int main(){
   // 5 -> 1 -> 2 -> NULL
   add_to_list(l, 5);
 
+  print_list(l);
+
+  for (int i = 0; i < 20; ++i){
+    add_to_list(l, random() % 100);
+  }
+  print_list(l);
+  merge_sort(l);
   print_list(l);
   delete_list(l);
   return 0;
