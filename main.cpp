@@ -22,14 +22,14 @@ auto myheapsort = [](auto begin, auto end) {
     }
   };
   int n = end - begin;
-  for (int i = (n - 1) / 2; i >= 0; --i){ 
+  for (int i = (n - 1) / 2; i >= 0; --i){
     stableize(i);
   }
   // Sort the heap
   while(end - begin > 0){
-    std::swap(*begin, *(end-- - 1));
+    std::swap(*begin, *(--end));
     stableize(0);
-  }  
+  }
 };
 
 class Timer {
@@ -46,20 +46,20 @@ class Timer {
 int main(int argc, char ** args){
   std::vector<int> v1,v2;
   for (int i = 0; i < 4000000; ++i){
-    int rand = random() / 10000000;
+    int rand = random() % 100;
     v1.push_back( rand);
     v2.push_back( rand);
   }
   {
     Timer t;
-    myheapsort(v1.begin(), v1.end()); 
+    sort(v2.begin(), v2.end());
   }
   {
     Timer t;
-    sort(v2.begin(), v2.end()); 
+    myheapsort(v1.begin(), v1.end());
   }
 
   //for (auto && i : v1) std::cout << i << " ";
-  //std::cout << std::endl;
+  std::cout << std::endl;
   return 0;
 }
