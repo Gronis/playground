@@ -2,15 +2,6 @@
 #include <vector>
 #include <cmath>
 
-// pretty printer for arrays
-template<typename T>
-std::ostream & operator<<(std::ostream & os, std::vector<T> vec){
-    os << "{ ";
-    std::copy(vec.begin(), vec.end(), std::ostream_iterator<T>(os, " "));
-    os << "}";
-    return os;
-}
-
 double findMedianSortedArrays(std::vector<int>& v1,
   /* v1 is biggest */         std::vector<int>& v2) {
   if(v1.size() < v2.size()) std::swap(v1,v2);
@@ -18,9 +9,7 @@ double findMedianSortedArrays(std::vector<int>& v1,
   //setup itervals
   struct interval {
     std::vector<int>& v;
-    int begin;
-    int end;
-    int i;
+    int begin, end, i;
   }
   iv1{v1, -1,(int)v1.size() - 1, (int)(v1.size() - 1) / 2},
   iv2{v2, -1,(int)v2.size() - 1, (int)(v2.size() - 1) / 2};
@@ -32,18 +21,20 @@ double findMedianSortedArrays(std::vector<int>& v1,
   // Finding median of v1, considering v2 as all small or large depending on
   // small_set_size
   auto median = [&](auto& v1, auto& v2, int small_set_size){
+    // small_set_size should be either 0 of sizeof(v2), correct the index
     int v2_index = small_set_size == 0? small_set_size : small_set_size - 1;
-    int index = total_size / 2 - small_set_size;
-    std::cout << "v1: " << v1 << std::endl;
-    std::cout << "v2: " << v2 << std::endl;
-    // in case the small set and large set are the same in size, combine them
-    if((index + small_set_size) * 2 == total_size){
-      std::cout << "index:    " << index << std::endl;
-      std::cout << "v2_index: " <<  v2_index << std::endl;
-      int v1val = index < v1.size()? v1[index] : v2[v2_index];
-      int v2val = index - 1 >= 0? v1[index - 1] : v2[v2_index];
-      return (v1val + (double)v2val) / 2;
-    } else return (double)v1[index];
+    int median_i = total_size / 2 - small_set_size;
+    // In case the small set and large set are the same in size, combine them
+    if((median_i + small_set_size) * 2 == total_size){
+      // Make sure they overflow on v2 when out of bounds
+      int v1val = median_i < v1.size()? v1[median_i    ] : v2[v2_index];
+      int v2val = median_i - 1    >= 0? v1[median_i - 1] : v2[v2_index];
+      return (v1val + static_cast<double>(v2val)) / 2;
+    }
+    // If the set are not equal, we know that the result is located on v1
+    else {
+      return static_cast<double>(v1[median_i]);
+    }
   };
 
   // get set to expand if expand is needed
@@ -105,13 +96,6 @@ double findMedianSortedArrays(std::vector<int>& v1,
     return abs(total_size - small_set_size() * 2) > 1;
   };
 
-  std::cout << "v1: " << v1 << std::endl;
-  std::cout << "v2: " << v2 << std::endl;
-  std::cout << "[" << iv1.begin << " i1: " << iv1.i << " ]" << iv1.end << std::endl;
-  std::cout << "[" << iv2.begin << " i2: " << iv2.i << " ]" << iv2.end << std::endl;
-  std::cout << "smallest max: " << smallest_max() << std::endl;
-  std::cout << "largest  min: " << largest_min()  << std::endl;
-
   // before we do anything, call median if one list is empty
   if(v2.size() == 0) return median(v1,v2,0);
 
@@ -123,11 +107,6 @@ double findMedianSortedArrays(std::vector<int>& v1,
     } else {
       expand();
     }
-    std::cout << "[" << iv1.begin << " i1: " << iv1.i << " ]" << iv1.end << std::endl;
-    std::cout << "[" << iv2.begin << " i2: " << iv2.i << " ]" << iv2.end << std::endl;
-    std::cout << "smallest max: " << smallest_max() << std::endl;
-    std::cout << "largest  min: " << largest_min()  << std::endl;
-
     // In case one set is fully enclosed, find the median of the other set
     if(iv1.begin > iv1.end)
       return median(v2, v1, iv1.begin);
@@ -141,27 +120,72 @@ double findMedianSortedArrays(std::vector<int>& v1,
   } else if (small_set_size() < large_set_size()){
     return smallest_max();
   } else {
-    return (largest_min() + (double)smallest_max()) / 2;
+    return (largest_min() + static_cast<double>(smallest_max())) / 2;
   }
 }
 
+template<typename T>
+std::ostream & operator<<(std::ostream & os, std::vector<T> vec){
+    os << "{ ";
+    std::copy(vec.begin(), vec.end(), std::ostream_iterator<T>(os, " "));
+    os << "}";
+    return os;
+}
+
 int main(int argc, char ** args){
-  // std::vector<int> v1 = { 1, 2, 3};
-  // std::vector<int> v2 = {-3,-2,-1,-1,-1,-1,-1};
-  // std::vector<int> v1 = { 2 };
-  // std::vector<int> v2 = { 1, 3, 4};
-  // std::vector<int> v1 = { 1, 2, 3,4,5,6,7};
-  // std::vector<int> v2 = {-3,-2,-1,1,2,3,4};
-  // std::vector<int> v1 = {};
-  // std::vector<int> v2 = {1};
-  // std::vector<int> v1 = {-1};
-  // std::vector<int> v2 = {2,3,5};
-  // std::vector<int> v1 = {};
-  // std::vector<int> v2 = {2,3};
-  // std::vector<int> v1 = {3,4};
-  // std::vector<int> v2 = {1,2};
-  std::vector<int> v1 = {-1,0,1};
-  std::vector<int> v2 = {2,3,5};
-  std::cout << findMedianSortedArrays(v1,v2) << std::endl;
+
+  // Evaluation that algorithm is working
+  struct test{
+    std::vector<int> v1, v2;
+    double median;
+  };
+
+  auto tests =
+  { test{ {             1, 2, 3 }
+        , {-3,-2,-1,-1,-1,-1,-1 }
+        , -1.0 //<- median
+        }
+  , test{ {       2 }
+        , { 1, 3, 4 }
+        , 2.5 //<- median
+        }
+  , test{ {  1, 2, 3, 4, 5, 6, 7 }
+        , { -3,-2,-1, 1, 2, 3, 4 }
+        , 2.5 //<- median
+        }
+  , test{ {   }
+        , { 1 }
+        , 1.0 //<- median
+        }
+  , test{ {       -1 }
+        , {  2, 3, 5 }
+        , 2.5 //<- median
+        }
+  , test{ {      }
+        , { 2, 3 }
+        , 2.5 //<- median
+        }
+  , test{ { 3, 4 }
+        , { 1, 2 }
+        , 2.5 //<- median
+        }
+  , test{ { -1, 0, 1 }
+        , {  2, 3, 5 }
+        , 1.5 //<- median
+        }
+  };
+  for(auto&& t : tests){
+    std::vector<int> v1 = t.v1;
+    std::vector<int> v2 = t.v2;
+    double median = findMedianSortedArrays(v1, v2);
+
+    // Print trace if not correct
+    if(median != t.median){
+      std::cout << "v1: " << v1 << std::endl;
+      std::cout << "v2: " << v2 << std::endl;
+      std::cout << "Expected: " << t.median << std::endl;
+      std::cout << "Found:    " <<   median << std::endl;
+    }
+  }
   return 0;
 }
