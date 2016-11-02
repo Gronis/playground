@@ -6,7 +6,9 @@
 *.elf
 *.s
 *.ll
+.ycm_extra_conf.pyc
 a.out
+=======
 
 # Precompiled Headers
 *.gch
